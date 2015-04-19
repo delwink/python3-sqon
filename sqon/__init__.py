@@ -117,7 +117,7 @@ class DatabaseConnection():
     def close(self):
         libsqon_so.sqon_close(byref(self._db))
 
-    def query(self, query_str, pk):
+    def query(self, query_str, pk=None):
         c_out = c_char_p()
         real_pk_param = None if pk == None else pk.encode('utf-8')
 
