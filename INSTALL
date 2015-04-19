@@ -1,0 +1,56 @@
+Installing python3-sqon
+=======================
+
+Before installing python3-sqon, one must satisfy its runtime and setup
+dependencies.
+
+| Library            | Purpose                                               |
+|--------------------+-------------------------------------------------------|
+| CPython 3          | Python programming language interpreter.              |
+| python3-setuptools | Python 3 package distribution and installation tools. |
+| libsqon            | C backend functionality.                              |
+
+Installing the Dependencies
+---------------------------
+
+On GNU/Linux, one usually installs required libraries using a package
+manager. These differ between distributions; we have below the example for
+Debian GNU/Linux and derivatives (such as Trisquel).
+
+    # apt-get install python3 python3-setuptools
+
+You will likely need to build libsqon manually, unless your software
+distribution packages it for you. The following should work on any GNU system.
+
+    $ wget http://delwink.com/dl/libsqon-delX.Y.Z.tar.gz
+    $ tar xzf libsqon-delX.Y.Z.tar.gz
+    $ cd libsqon-delX.Y.Z
+    $ ./autogen.sh
+    $ ./configure
+    $ make
+    # make install
+
+Take a look at libsqon's INSTALL file for more details on building it and
+properly installing it for your operating system.
+
+Building python3-sqon
+---------------------
+
+Python is an interpreted language which will automatically build when executed,
+but it is possible to build this module ahead of time using the setuptools
+features. You can build source distributions with
+
+    $ python3 setup.py sdist
+
+and you can build executable distributions with
+
+    $ python3 setup.py bdist
+
+Installing python3-sqon
+-----------------------
+
+If you have created an executable distribution as shown above, you can install
+it on any system by extracting it in the root directory (on Unix-like
+systems). Otherwise, you can install it on the current system using
+
+    # python3 setup.py install
