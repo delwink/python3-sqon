@@ -15,6 +15,7 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+import json
 from ctypes import *
 
 __title__ = 'sqon'
@@ -127,7 +128,7 @@ class DatabaseConnection():
         py_out = c_out.value.decode('utf-8')
         libsqon_so.sqon_free(c_out)
 
-        return py_out
+        return json.loads(py_out)
 
     def get_pk(self, table):
         c_out = c_char_p()
