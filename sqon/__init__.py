@@ -46,7 +46,7 @@ SQON_ERRORS = {
     -13: ('BufferOverflowError', 'A buffer overflow error occurred while '
                                  'handling the query'),
     -14: (NotImplementedError, ''),
-    -20: ('ConnectionError', 'There wan an error establishing a connection '
+    -20: ('ConnectionError', 'There was an error establishing a connection '
                              'with the database'),
     -21: ('NoColumnsInSetError', 'No columns were in the result set'),
     -23: ('NoPrimaryKeyError', 'Requested primary key was not found in '
