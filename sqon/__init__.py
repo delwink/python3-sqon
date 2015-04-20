@@ -63,7 +63,8 @@ def check_sqon_error(rc):
     if 0 == rc:
         return
     else:
-        error, message = SQON_ERRORS.get(rc, (Exception, UNKNOWN_ERROR_STRING.format(rc)))
+        error, message = SQON_ERRORS.get(rc, (Exception,
+                                              UNKNOWN_ERROR_STRING.format(rc)))
         if type(error) is str:
             error = type(error, (Exception,), {})
         raise error(message)
