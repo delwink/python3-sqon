@@ -41,55 +41,33 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 
-SQON_MEMORYERROR = -12
-SQON_OVERFLOW    = -13
-SQON_UNSUPPORTED = -14
-SQON_CONNECTERR  = -20
-SQON_NOCOLUMNS   = -21
-SQON_NOPK        = -23
-SQON_PKNOTUNIQUE = -24
+SQON_ERRORS = {
+    -12: (MemoryError, 'An error occurred while allocating memory'),
+    -13: ('BufferOverflowError', 'A buffer overflow error occurred while '
+                                 'handling the query'),
+    -14: (NotImplementedError, ''),
+    -20: ('ConnectionError', 'There was an error establishing a connection '
+                             'with the database'),
+    -21: ('NoColumnsInSetError', 'No columns were in the result set'),
+    -23: ('NoPrimaryKeyError', 'Requested primary key was not found in '
+                               'the table'),
+    -24: ('PrimaryKeyNotUniqueError', 'Requested primary key was not unique')
+}
+UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
 
 libsqon_so = CDLL('libsqon.so.0')
 libsqon_so.sqon_init()
 
-class BufferOverflowError(Exception):
-    pass
-
-class ConnectionError(Exception):
-    pass
-
-class NoColumnsInSetError(Exception):
-    pass
-
-class NoPrimaryKeyError(Exception):
-    pass
-
-class PrimaryKeyNotUniqueError(Exception):
-    pass
 
 def check_sqon_error(rc):
     if 0 == rc:
         return
-    elif SQON_MEMORYERROR == rc:
-        raise MemoryError('An error occurred while allocating memory')
-    elif SQON_OVERFLOW == rc:
-        raise BufferOverflowError('A buffer overflow error occurred while '
-                                  + 'handling the query')
-    elif SQON_UNSUPPORTED == rc:
-        raise NotImplementedError()
-    elif SQON_CONNECTERR == rc:
-        raise ConnectionError('There was an error establishing a connection '
-                              + 'with the database')
-    elif SQON_NOCOLUMNS == rc:
-        raise NoColumnsInSetError('No columns were in the result set')
-    elif SQON_NOPK == rc:
-        raise NoPrimaryKeyError('Requested primary key was not found in the '
-                                + 'table')
-    elif SQON_PKNOTUNIQUE == rc:
-        raise PrimaryKeyNotUniqueError('Requested primary key was not unique')
     else:
-        raise Exception('Error code '
-                        + '{} occurred while processing the query'.format(rc))
+        error, message = SQON_ERRORS.get(rc, (Exception,
+                                              UNKNOWN_ERROR_STRING.format(rc)))
+        if type(error) is str:
+            error = type(error, (Exception,), {})
+        raise error(message)
 
 SQON_DBCONN_MYSQL = 1
 
