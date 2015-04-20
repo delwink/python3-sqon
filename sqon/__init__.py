@@ -42,7 +42,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 
 SQON_ERRORS = {
-    -12: ('MemoryError', 'An error occurred while allocating memory'),
+    -12: (MemoryError, 'An error occurred while allocating memory'),
     -13: ('BufferOverflowError', 'A buffer overflow error occurred while '
                                  'handling the query'),
     -14: (NotImplementedError, ''),
