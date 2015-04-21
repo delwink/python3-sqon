@@ -71,7 +71,7 @@ def _check_for_error(rc):
 
 SQON_DBCONN_MYSQL = 1
 
-class _sqon_dbsrv(Structure):
+class DatabaseServer(Structure):
     _fields_ = [('com', c_void_p),
                 ('isopen', c_bool),
                 ('type', c_uint8),
@@ -80,26 +80,26 @@ class _sqon_dbsrv(Structure):
                 ('passwd', c_char_p),
                 ('database', c_char_p)]
 
-class DatabaseConnection():
     def __init__(self, type=SQON_DBCONN_MYSQL, host='localhost',
                  user='root', passwd='root', database=None):
-        self._db = _sqon_dbsrv(type=type, host=host.encode('utf-8'),
-                               user=user.encode('utf-8'),
-                               passwd=passwd.encode('utf-8'),
-                               database=database.encode('utf-8'))
+        self.type = type
+        self.host = host.encode('utf-8')
+        self.user = user.encode('utf-8')
+        self.passwd = passwd.encode('utf-8')
+        self.database = database.encode('utf-8')
 
     def connect(self):
-        rc = libsqon_so.sqon_connect(byref(self._db))
+        rc = libsqon_so.sqon_connect(byref(self))
         _check_for_error(rc)
 
     def close(self):
-        libsqon_so.sqon_close(byref(self._db))
+        libsqon_so.sqon_close(byref(self))
 
     def query(self, query_str, pk=None):
         c_out = c_char_p()
         real_pk_param = None if pk == None else pk.encode('utf-8')
 
-        rc = libsqon_so.sqon_query(byref(self._db), query_str.encode('utf-8'),
+        rc = libsqon_so.sqon_query(byref(self), query_str.encode('utf-8'),
                                    byref(c_out), real_pk_param)
         _check_for_error(rc)
 
@@ -108,10 +108,10 @@ class DatabaseConnection():
 
         return json.loads(py_out)
 
-    def get_pk(self, table):
+    def get_primary_key(self, table):
         c_out = c_char_p()
 
-        rc = libsqon_so.sqon_get_pk(byref(self._db), table.encode('utf-8'),
+        rc = libsqon_so.sqon_get_pk(byref(self), table.encode('utf-8'),
                                     byref(c_out))
         _check_for_error(rc)
 
@@ -120,11 +120,11 @@ class DatabaseConnection():
 
         return py_out
 
-    def escape_str(self, input, quote=False):
+    def escape_string(self, input, quote=False):
         n = c_size_t(len(input) * 2 + 1)
         c_out = create_string_buffer(n.value)
 
-        rc = libsqon_so.sqon_escape(byref(self._db), input.encode('utf-8'),
+        rc = libsqon_so.sqon_escape(byref(self), input.encode('utf-8'),
                                     byref(c_out), n, quote)
         _check_for_error(rc)
 
