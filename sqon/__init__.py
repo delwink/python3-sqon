@@ -53,7 +53,7 @@ _SQON_ERRORS = {
                                'the table'),
     -24: ('PrimaryKeyNotUniqueError', 'Requested primary key was not unique')
 }
-UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
+_UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
 
 _SQON_CONNECTION_TYPES = {
     'mysql': 1
