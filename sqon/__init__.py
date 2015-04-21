@@ -41,7 +41,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 
-SQON_ERRORS = {
+_SQON_ERRORS = {
     -12: (MemoryError, 'An error occurred while allocating memory'),
     -13: ('BufferOverflowError', 'A buffer overflow error occurred while '
                                  'handling the query'),
@@ -55,9 +55,12 @@ SQON_ERRORS = {
 }
 UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
 
-libsqon_so = CDLL('libsqon.so.0')
-libsqon_so.sqon_init()
+_SQON_CONNECTION_TYPES = {
+    'mysql': 1
+}
 
+_libsqon_so = CDLL('libsqon.so.0')
+_libsqon_so.sqon_init()
 
 def _check_for_error(rc):
     if 0 == rc:
@@ -69,8 +72,6 @@ def _check_for_error(rc):
             error = type(error, (Exception,), {})
         raise error(message)
 
-SQON_DBCONN_MYSQL = 1
-
 class DatabaseServer(Structure):
     _fields_ = [('com', c_void_p),
                 ('isopen', c_bool),
@@ -80,43 +81,43 @@ class DatabaseServer(Structure):
                 ('passwd', c_char_p),
                 ('database', c_char_p)]
 
-    def __init__(self, type=SQON_DBCONN_MYSQL, host='localhost',
-                 user='root', passwd='root', database=None):
-        self.type = type
+    def __init__(self, type='mysql', host='localhost', user='root',
+                 passwd='root', database=None):
+        self.type = _SQON_CONNECTION_TYPES[type]
         self.host = host.encode('utf-8')
         self.user = user.encode('utf-8')
         self.passwd = passwd.encode('utf-8')
         self.database = database.encode('utf-8')
 
     def connect(self):
-        rc = libsqon_so.sqon_connect(byref(self))
+        rc = _libsqon_so.sqon_connect(byref(self))
         _check_for_error(rc)
 
     def close(self):
-        libsqon_so.sqon_close(byref(self))
+        _libsqon_so.sqon_close(byref(self))
 
     def query(self, query_str, pk=None):
         c_out = c_char_p()
         real_pk_param = None if pk == None else pk.encode('utf-8')
 
-        rc = libsqon_so.sqon_query(byref(self), query_str.encode('utf-8'),
-                                   byref(c_out), real_pk_param)
+        rc = _libsqon_so.sqon_query(byref(self), query_str.encode('utf-8'),
+                                    byref(c_out), real_pk_param)
         _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
-        libsqon_so.sqon_free(c_out)
+        _libsqon_so.sqon_free(c_out)
 
         return json.loads(py_out)
 
     def get_primary_key(self, table):
         c_out = c_char_p()
 
-        rc = libsqon_so.sqon_get_pk(byref(self), table.encode('utf-8'),
-                                    byref(c_out))
+        rc = _libsqon_so.sqon_get_pk(byref(self), table.encode('utf-8'),
+                                     byref(c_out))
         _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
-        libsqon_so.sqon_free(c_out)
+        _libsqon_so.sqon_free(c_out)
 
         return py_out
 
@@ -124,8 +125,8 @@ class DatabaseServer(Structure):
         n = c_size_t(len(input) * 2 + 1)
         c_out = create_string_buffer(n.value)
 
-        rc = libsqon_so.sqon_escape(byref(self), input.encode('utf-8'),
-                                    byref(c_out), n, quote)
+        rc = _libsqon_so.sqon_escape(byref(self), input.encode('utf-8'),
+                                     byref(c_out), n, quote)
         _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
