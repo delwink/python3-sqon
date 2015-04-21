@@ -59,7 +59,7 @@ libsqon_so = CDLL('libsqon.so.0')
 libsqon_so.sqon_init()
 
 
-def check_sqon_error(rc):
+def _check_for_error(rc):
     if 0 == rc:
         return
     else:
@@ -90,7 +90,7 @@ class DatabaseConnection():
 
     def connect(self):
         rc = libsqon_so.sqon_connect(byref(self._db))
-        check_sqon_error(rc)
+        _check_for_error(rc)
 
     def close(self):
         libsqon_so.sqon_close(byref(self._db))
@@ -101,7 +101,7 @@ class DatabaseConnection():
 
         rc = libsqon_so.sqon_query(byref(self._db), query_str.encode('utf-8'),
                                    byref(c_out), real_pk_param)
-        check_sqon_error(rc)
+        _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
         libsqon_so.sqon_free(c_out)
@@ -113,7 +113,7 @@ class DatabaseConnection():
 
         rc = libsqon_so.sqon_get_pk(byref(self._db), table.encode('utf-8'),
                                     byref(c_out))
-        check_sqon_error(rc)
+        _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
         libsqon_so.sqon_free(c_out)
@@ -126,7 +126,7 @@ class DatabaseConnection():
 
         rc = libsqon_so.sqon_escape(byref(self._db), input.encode('utf-8'),
                                     byref(c_out), n, quote)
-        check_sqon_error(rc)
+        _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
 
