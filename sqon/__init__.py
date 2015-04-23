@@ -19,12 +19,12 @@ from json import loads
 from ctypes import *
 
 __title__ = 'sqon'
-__version__ = '0.0.0'
+__version__ = '0.1.0'
 __author__ = 'David McMackins II'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
 
-SQON_VERSION = '0.0.4'
+SQON_VERSION = '1.0.0'
 SQON_COPYRIGHT = \
 """libsqon - C API for Delwink's Structured Query Object Notation
 Copyright (C) 2015 Delwink, LLC
@@ -59,7 +59,7 @@ _SQON_CONNECTION_TYPES = {
     'mysql': 1
 }
 
-_libsqon_so = CDLL('libsqon.so.0')
+_libsqon_so = CDLL('libsqon.so.1')
 _libsqon_so.sqon_init()
 
 def _check_for_error(rc):
@@ -79,15 +79,17 @@ class DatabaseServer(Structure):
                 ('host', c_char_p),
                 ('user', c_char_p),
                 ('passwd', c_char_p),
-                ('database', c_char_p)]
+                ('database', c_char_p),
+                ('port', c_char_p)]
 
     def __init__(self, type='mysql', host='localhost', user='root',
-                 passwd='root', database=None):
+                 passwd='root', database=None, port='0'):
         self.type = _SQON_CONNECTION_TYPES[type]
         self.host = host.encode('utf-8')
         self.user = user.encode('utf-8')
         self.passwd = passwd.encode('utf-8')
         self.database = database.encode('utf-8')
+        self.port = port.encode('utf-8')
 
     def connect(self):
         rc = _libsqon_so.sqon_connect(byref(self))
@@ -112,8 +114,9 @@ class DatabaseServer(Structure):
     def get_primary_key(self, table):
         c_out = c_char_p()
 
-        rc = _libsqon_so.sqon_get_pk(byref(self), table.encode('utf-8'),
-                                     byref(c_out))
+        rc = _libsqon_so.sqon_get_primary_key(byref(self),
+                                              table.encode('utf-8'),
+                                              byref(c_out))
         _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
@@ -122,13 +125,13 @@ class DatabaseServer(Structure):
         return py_out
 
     def escape_string(self, input, quote=False):
-        n = c_size_t(len(input) * 2 + 1)
-        c_out = create_string_buffer(n.value)
+        c_out = c_char_p()
 
         rc = _libsqon_so.sqon_escape(byref(self), input.encode('utf-8'),
-                                     byref(c_out), n, quote)
+                                     byref(c_out), quote)
         _check_for_error(rc)
 
         py_out = c_out.value.decode('utf-8')
+        _libsqon_so.sqon_free(c_out)
 
         return py_out
