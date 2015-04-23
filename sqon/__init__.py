@@ -15,6 +15,12 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+## @package sqon
+#  Python API for Delwink's libsqon C library.
+#  @date 4/23/15
+#  @author David McMackins II
+#  @version 0.1
+
 from json import loads
 from ctypes import *
 
@@ -24,7 +30,10 @@ __author__ = 'David McMackins II'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
 
+## Version of the supported C API.
 SQON_VERSION = '1.0.0'
+
+## Copyright information for the C API.
 SQON_COPYRIGHT = \
 """libsqon - C API for Delwink's Structured Query Object Notation
 Copyright (C) 2015 Delwink, LLC
@@ -72,6 +81,11 @@ def _check_for_error(rc):
             error = type(error, (Exception,), {})
         raise error(message)
 
+## The database server connection handler.
+#
+#  This class is responsible for all interaction with the database server.
+# After instantiation, it can do generic queries, get the primary key of a
+# table, and escape strings to be inserted into queries.
 class DatabaseServer(Structure):
     _fields_ = [('com', c_void_p),
                 ('isopen', c_bool),
@@ -82,8 +96,18 @@ class DatabaseServer(Structure):
                 ('database', c_char_p),
                 ('port', c_char_p)]
 
+    ## The constructor for this class.
+    #  @param type A string representation of the database type; currently
+    # supported: 'mysql' (default).
+    #  @param host The hostname or IP address of the database server.
+    #  @param user Username with which to log into the server.
+    #  @param passwd Password by which to authenticate with the server
+    # (default is no password).
+    #  @param database The database to set as the default database for
+    # queries.
+    #  @param port String representation of the port number.
     def __init__(self, type='mysql', host='localhost', user='root',
-                 passwd='root', database=None, port='0'):
+                 passwd=None, database=None, port='0'):
         self.type = _SQON_CONNECTION_TYPES[type]
         self.host = host.encode('utf-8')
         self.user = user.encode('utf-8')
@@ -91,16 +115,31 @@ class DatabaseServer(Structure):
         self.database = database.encode('utf-8')
         self.port = port.encode('utf-8')
 
+    ## Explicitly connect to the database.
+    #
+    #  This is not absolutely necessary to use, since the other functions will
+    # automatically connect to the database as needed. Use this as a
+    # performance enhancement when making queries in rapid succession.
     def connect(self):
         rc = _libsqon_so.sqon_connect(byref(self))
         _check_for_error(rc)
 
+    ## Close connection to the database.
+    #
+    #  Only needed after explicitly connecting to the database.
     def close(self):
         _libsqon_so.sqon_close(byref(self))
 
-    def query(self, query_str, pk=None):
+    ## Query the database.
+    #  @param query_str SQL statement to be run on the database.
+    #  @param primary_key If expecting a result set, the key by which to
+    # organize the JSON object returned.
+    #  @return List of result set if primary_key is None, else a dictionary in
+    # which the keys are primary_key and the values are the remaining results.
+    def query(self, query_str, primary_key=None):
         c_out = c_char_p()
-        real_pk_param = None if pk == None else pk.encode('utf-8')
+        real_pk_param = \
+                None if primary_key == None else primary_key.encode('utf-8')
 
         rc = _libsqon_so.sqon_query(byref(self), query_str.encode('utf-8'),
                                     byref(c_out), real_pk_param)
@@ -111,6 +150,9 @@ class DatabaseServer(Structure):
 
         return loads(py_out)
 
+    ## Get the primary key of a table.
+    #  @param table Database table for which to get the primary key.
+    #  @return String representation of the primary key.
     def get_primary_key(self, table):
         c_out = c_char_p()
 
@@ -124,6 +166,10 @@ class DatabaseServer(Structure):
 
         return py_out
 
+    ## Escape a string to be placed in a query.
+    #  @param input The string to be escaped.
+    #  @param quote Whether to surround the output in apostrophe characters.
+    #  @return The escaped string.
     def escape_string(self, input, quote=False):
         c_out = c_char_p()
 
