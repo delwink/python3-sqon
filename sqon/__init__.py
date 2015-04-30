@@ -181,3 +181,11 @@ class DatabaseServer(Structure):
         _libsqon_so.sqon_free(c_out)
 
         return py_out
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return False
