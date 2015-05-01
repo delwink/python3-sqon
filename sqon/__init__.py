@@ -74,12 +74,13 @@ _libsqon_so.sqon_init()
 def _check_for_error(rc):
     if 0 == rc:
         return
-    else:
-        error, message = _SQON_ERRORS.get(rc, (Exception,
-                                               _UNKNOWN_ERROR_STRING.format(rc)))
-        if type(error) is str:
-            error = type(error, (Exception,), {})
-        raise error(message)
+
+    error, message = _SQON_ERRORS.get(rc, (Exception,
+                                           _UNKNOWN_ERROR_STRING.format(rc)))
+
+    if type(error) is str:
+        error = type(error, (Exception,), {})
+    raise error(message)
 
 ## The database server connection handler.
 #
