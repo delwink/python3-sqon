@@ -109,11 +109,14 @@ class DatabaseServer(Structure):
     #  @param port String representation of the port number.
     def __init__(self, type='mysql', host='localhost', user='root',
                  passwd=None, database=None, port='0'):
+        real_passwd = None if None == passwd else passwd.encode('utf-8')
+        real_db = None if None == database else database.encode('utf-8')
+
         self.type = _SQON_CONNECTION_TYPES[type]
         self.host = host.encode('utf-8')
         self.user = user.encode('utf-8')
-        self.passwd = passwd.encode('utf-8')
-        self.database = database.encode('utf-8')
+        self.passwd = real_passwd
+        self.database = real_db
         self.port = port.encode('utf-8')
 
     ## Explicitly connect to the database.
