@@ -17,21 +17,21 @@
 
 ## @package sqon
 #  Python API for Delwink's libsqon C library.
-#  @date 4/23/15
+#  @date 06/27/15
 #  @author David McMackins II
-#  @version 0.1
+#  @version 0.2
 
 from json import loads
 from ctypes import *
 
 __title__ = 'sqon'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __author__ = 'David McMackins II'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
 
 ## Version of the supported C API.
-SQON_VERSION = '1.0.0'
+SQON_VERSION = '1.1.0'
 
 ## Copyright information for the C API.
 SQON_COPYRIGHT = \
@@ -89,7 +89,7 @@ def _check_for_error(rc):
 # table, and escape strings to be inserted into queries.
 class DatabaseServer(Structure):
     _fields_ = [('com', c_void_p),
-                ('isopen', c_bool),
+                ('connections', c_uint64),
                 ('type', c_uint8),
                 ('host', c_char_p),
                 ('user', c_char_p),
@@ -113,6 +113,7 @@ class DatabaseServer(Structure):
         real_db = None if None == database else database.encode('utf-8')
 
         self.type = _SQON_CONNECTION_TYPES[type]
+        self.connections = 0
         self.host = host.encode('utf-8')
         self.user = user.encode('utf-8')
         self.passwd = real_passwd
