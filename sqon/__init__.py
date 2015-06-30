@@ -31,7 +31,7 @@ __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
 
 ## Version of the supported C API.
-SQON_VERSION = '1.1.0'
+SQON_VERSION = '1.1'
 
 ## Copyright information for the C API.
 SQON_COPYRIGHT = \
@@ -58,8 +58,7 @@ _SQON_ERRORS = {
     -20: ('ConnectionError', 'There was an error establishing a connection '
                              'with the database'),
     -21: ('NoColumnsInSetError', 'No columns were in the result set'),
-    -23: ('NoPrimaryKeyError', 'Requested primary key was not found in '
-                               'the table'),
+    -23: (KeyError, 'Requested primary key was not found in the table'),
     -24: ('PrimaryKeyNotUniqueError', 'Requested primary key was not unique')
 }
 _UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
