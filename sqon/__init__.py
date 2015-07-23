@@ -17,15 +17,15 @@
 
 ## @package sqon
 #  Python API for Delwink's libsqon C library.
-#  @date 06/27/15
+#  @date 07/23/15
 #  @author David McMackins II
-#  @version 0.2
+#  @version 0.3
 
 from json import loads
 from ctypes import *
 
 __title__ = 'sqon'
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 __author__ = 'David McMackins II'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
@@ -99,7 +99,7 @@ class DatabaseServer(Structure):
 
     ## The constructor for this class.
     #  @param type A string representation of the database type; currently
-    # supported: 'mysql' (default).
+    # supported: 'mysql' (default), 'postgres'.
     #  @param host The hostname or IP address of the database server.
     #  @param user Username with which to log into the server.
     #  @param passwd Password by which to authenticate with the server
