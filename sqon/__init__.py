@@ -25,13 +25,13 @@ from json import loads
 from ctypes import *
 
 __title__ = 'sqon'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __author__ = 'David McMackins II'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2015 Delwink, LLC'
 
 ## Version of the supported C API.
-SQON_VERSION = '1.1'
+SQON_VERSION = '1.2'
 
 ## Copyright information for the C API.
 SQON_COPYRIGHT = \
@@ -64,7 +64,8 @@ _SQON_ERRORS = {
 _UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
 
 _SQON_CONNECTION_TYPES = {
-    'mysql': 1
+    'mysql': 1,
+    'postgres': 2
 }
 
 _libsqon_so = CDLL('libsqon.so.1')
