@@ -17,12 +17,13 @@
 
 ## @package sqon
 #  Python API for Delwink's libsqon C library.
-#  @date 07/23/15
+#  @date 07/23/2015
 #  @author David McMackins II
 #  @version 0.3
 
 from json import loads
 from ctypes import *
+from .error import *
 
 __title__ = 'sqon'
 __version__ = '0.3.0'
@@ -50,17 +51,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 
-_SQON_ERRORS = {
-    -12: (MemoryError, 'An error occurred while allocating memory'),
-    -13: ('BufferOverflowError', 'A buffer overflow error occurred while '
-                                 'handling the query'),
-    -14: (NotImplementedError, ''),
-    -20: ('ConnectionError', 'There was an error establishing a connection '
-                             'with the database'),
-    -21: ('NoColumnsInSetError', 'No columns were in the result set'),
-    -23: (KeyError, 'Requested primary key was not found in the table'),
-    -24: ('PrimaryKeyNotUniqueError', 'Requested primary key was not unique')
-}
 _UNKNOWN_ERROR_STRING = 'Error code {} occurred while processing query'
 
 _SQON_CONNECTION_TYPES = {
@@ -75,8 +65,8 @@ def _check_for_error(rc):
     if 0 == rc:
         return
 
-    error, message = _SQON_ERRORS.get(rc, (Exception,
-                                           _UNKNOWN_ERROR_STRING.format(rc)))
+    error, message = SQON_ERRORS.get(rc, (Exception,
+                                          _UNKNOWN_ERROR_STRING.format(rc)))
 
     if type(error) is str:
         error = type(error, (Exception,), {})
